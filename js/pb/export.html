@@ -1,0 +1,16 @@
+<div id="main_app">
+</div>
+<script type="text/javascript">
+    var main_menu;
+    var main_app;
+    function init() {
+	document.getElementById("main_app").innerHTML = main_app.innerHTML;
+	var main_menu_elem = document.getElementById(main_menu.id);
+	for (var mi = 0; mi < main_menu.item_ids.length; mi++) {
+		document.getElementById(main_menu.item_ids[mi]).remove();
+	}
+	main_menu_elem.remove();
+    }
+
+    init();
+</script>
