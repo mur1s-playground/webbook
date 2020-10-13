@@ -6,6 +6,7 @@ class PhotobookController extends Controller {
 
 	function viewController() {
 		$this->HEAD[] = "<script type=\"text/javascript\" src=\"" . $this->CONFIG['SITE_URL_FILE'] . "js/pb/main.js\"></script>";
+		$this->HEAD[] = "<script type=\"text/javascript\" src=\"" . $this->CONFIG['SITE_URL_FILE'] . "js/pb/animation.js\"></script>";
 		$this->HEAD[] = "<script type=\"text/javascript\" src=\"" . $this->CONFIG['SITE_URL_FILE'] . "js/pb/mainmenu.js\"></script>";
 		$this->HEAD[] = "<script type=\"text/javascript\" src=\"" . $this->CONFIG['SITE_URL_FILE'] . "js/pb/mainmenu_add.js\"></script>";
 		$this->HEAD[] = "<script type=\"text/javascript\" src=\"" . $this->CONFIG['SITE_URL_FILE'] . "js/pb/mainmenu_edit.js\"></script>";

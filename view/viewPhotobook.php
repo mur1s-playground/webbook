@@ -32,6 +32,9 @@
 	var main_app = new Main();
 	main_app.base_name = "main_app";
 
+	var main_animation = new Animation();
+	main_app.component_add(main_animation, "main_app");
+
 	var main_menu = new MainMenu();
 	main_app.component_add(main_menu, "main_app");
 
