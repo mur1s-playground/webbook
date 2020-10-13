@@ -10,8 +10,7 @@ var MainMenu_Static_toggle_menu = function(id) {
                 }
 }
 
-
-var MainMenu_Static_toggle_controls = function(id, expand = true) {
+var MainMenu_Static_toggle_controls = function(id, expand = true, pos_right = null) {
 	var menu = document.getElementById(main_menu.id + "_menu");
 
 	var parent = document.getElementById(id);
@@ -26,7 +25,11 @@ var MainMenu_Static_toggle_controls = function(id, expand = true) {
 			}
 			selected_controls_id = id;
                		controls.style.display = "inline";
-			parent.style.right = menu.offsetWidth + controls.offsetWidth;
+			if (pos_right == null) {
+				parent.style.right = menu.offsetWidth + controls.offsetWidth;
+			} else {
+				controls.style.right = pos_right;
+			}
         	}
 	}
 }

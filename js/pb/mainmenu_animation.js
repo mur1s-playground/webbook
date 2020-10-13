@@ -71,7 +71,8 @@ var MainMenu_Animation_Static_set_current_frame = function(menu_id, frame = null
 	document.getElementById(menu_id + "_animation_keyframe_" + animation_current_frame.value).style.border = "1px solid black";
 	animation.current_frame = parseInt(animation_current_frame.value);
 
-	//TODO: if is between keyframes -> interpolate selected_ids state
+	Animation_Static_animation_frame_current = animation.frame_start + animation.current_frame - 1;
+	Animation_Static_next(true);
 }
 
 var MainMenu_Animation_Static_update_keyframes = function(menu_id) {
