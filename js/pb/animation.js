@@ -1,7 +1,7 @@
 var Animation_Static_animation_types = ["single", "repeat"];
 
 
-var Animation_Static_animation_type = "single";
+var Animation_Static_animation_type = "repeat";
 
 var Animation_Static_animated_ids = [];
 var Animation_Static_animations = {};
@@ -9,6 +9,54 @@ var Animation_Static_animations = {};
 var Animation_Static_animation_frame_max = 100;
 var Animation_Static_animation_frame_current = 0;
 
+var Animation_Static_next = function() {
+	if (Animation_Static_animation_type == "repeat") {
+		Animation_Static_animation_frame_current = (Animation_Static_animation_frame_current + 1) % (Animation_Static_animation_frame_max + 1);
+	} else if (Animation_Static_animation_type == "single") {
+		if (Animation_Static_animation_frame_current == Animation_Static_animation_frame_max) return;
+		Animation_Static_animation_frame_current++;
+	}
+	for (var a = 0; a < Animation_Static_animated_ids.length; a++) {
+		var current = Animation_Static_animations[Animation_Static_animated_ids[a]];
+		for (var animation_id in current) {
+			var animation = current[animation_id];
+			if (animation.frame_start <= Animation_Static_animation_frame_current && animation.frame_end > Animation_Static_animation_frame_current) {
+				var from_k = null;
+				var to_k = null;
+				for (var prop in animation.keyframes) {
+                			if (Object.prototype.hasOwnProperty.call(animation.keyframes, prop)) {
+						if (prop <= Animation_Static_animation_frame_current && (from_k == null || from_k < prop)) {
+							from_k = prop;
+						}
+						if (prop > Animation_Static_animation_frame_current && (to_k == null || to_k > prop)) {
+							to_k = prop;
+						}
+					}
+				}
+				if (from_k != null && to_k != null) {
+					var element = document.getElementById(Animation_Static_animated_ids[a]);
+					var content = document.getElementById(Animation_Static_animated_ids[a] + "_content");
+
+					var elem_from_style = animation.keyframes[from_k]["element_style"];
+					var elem_to_style = animation.keyframes[to_k]["element_style"];
+					for (var prop in elem_from_style) {
+						if (Object.prototype.hasOwnProperty.call(elem_from_style, prop) && Object.prototype.hasOwnProperty.call(elem_to_style, prop)) {
+							var f = elem_from_style[prop].replace(/^([\d]+(?:\.[\d]+)?)(px)?$/g, "$1");
+							var t = elem_to_style[prop].replace(/^([\d]+(?:\.[\d]+)?)(px)?$/g, "$1");
+							if (isNaN(f) || isNaN(t)) {
+
+							} else {
+								f = parseFloat(f);
+								t = parseFloat(t);
+								element.style[prop] = f + ((Animation_Static_animation_frame_current - from_k)/(to_k - from_k) * (t - f));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
 
 var Animation = function() {
 	this.pos = [0, 0];

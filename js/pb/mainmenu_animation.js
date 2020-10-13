@@ -83,9 +83,9 @@ var MainMenu_Animation_Static_update_keyframes = function(menu_id) {
 	var animation_length_form = document.getElementById(menu_id + "_animation_length_form");
 
         for (var prop in animation.keyframes) {
-                if (Object.prototype.hasOwnProperty.call(obj, prop)) {
+                if (Object.prototype.hasOwnProperty.call(animation.keyframes, prop)) {
                         if (prop > parseInt(animation_length_form.value)) {
-				delete animation.keyframes.prop;
+				delete animation.keyframes[prop];
 			}
                 }
         }
@@ -155,12 +155,15 @@ var MainMenu_Animation_Static_add_keyframe = function(menu_id) {
 			content_style:	Object.assign({}, content_elem.style),
 			content:	content_elem.innerHTML
 	};
+
+	document.getElementById(menu_id + "_animation_keyframe_" + animation.current_frame).style.backgroundColor = "#00aa00";
 }
 
 var MainMenu_Animation_Static_delete_keyframe = function(menu_id) {
 	var animation = Animation_Static_animations[selected_id][document.getElementById(menu_id + "_animation_select").selectedIndex];
         if (animation.keyframes.hasOwnProperty(animation.current_frame)) {
                 delete animation.keyframes[animation.current_frame];
+		document.getElementById(menu_id + "_animation_keyframe_" + animation.current_frame).style.backgroundColor = "";
         }
 }
 

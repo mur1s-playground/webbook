@@ -1,5 +1,5 @@
 <div class="content">
-	<div class="headline">Photobook</div><br>
+	<div class="headline">Webbook &#128679;</div><br>
 	<div id="main_app"></div>
 	<br><br><br><br>
 </div>
@@ -84,6 +84,7 @@
 
 			is_setup = true;
 		}
+		Animation_Static_next();
 	        requestAnimationFrame(mainLoop);
 	}
 	requestAnimationFrame(mainLoop);
