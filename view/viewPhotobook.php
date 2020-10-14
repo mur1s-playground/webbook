@@ -84,6 +84,9 @@
 
 			is_setup = true;
 		}
+		if (Animation_Static_animation_compiling) {
+			Animation_Static_compile_animations();
+		}
 		Animation_Static_next();
 	        requestAnimationFrame(mainLoop);
 	}

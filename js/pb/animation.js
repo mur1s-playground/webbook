@@ -10,9 +10,76 @@ var Animation_Static_animations = {};
 var Animation_Static_animation_frame_max = 100;
 var Animation_Static_animation_frame_current = 0;
 
-var Animation_Static_compile_animations = function() {
+//COMPILING
+var Animation_Static_animation_compiling = false;
+var Animation_Static_animation_is_compiled = false;
 
+var Animation_Static_animation_compiled_frames = 0;
+var Animation_Static_animation_compiled_id_ranges = [];
+var Animation_Static_animation_compiled_ids = {};
+
+var Animation_Static_start_compiling = function() {
+	Animation_Static_animation_compiling = true;
 }
+
+var Animation_Static_compile_animations = function() {
+	if (Animation_Static_animation_compiled_frames+1 == Animation_Static_animation_frame_max) {
+		Animation_Static_animation_is_compiled = true;
+		Animation_Static_animation_compiling = false;
+		Animation_Static_animation_compiled_frames = 0;
+	} else if (Animation_Static_animation_compiled_frames == 0) {
+		Animation_Static_animation_compiled_id_ranges = [];
+		Animation_Static_animation_compiled_ids = {};
+	}
+	var compiled_ids = {};
+	var compiled_ids_animation_count = 0;
+	for (var a = 0; a < Animation_Static_animated_ids.length; a++) {
+		var current = Animation_Static_animations[Animation_Static_animated_ids[a]];
+                for (var animation_id in current) {
+			if (!Object.prototype.hasOwnProperty.call(current, animation_id)) continue;
+                        var animation = current[animation_id];
+                        var keyfr = Animation_Static_is_animation_active(animation, Animation_Static_animation_compiled_frames);
+			if (keyfr[0] != null && keyfr[1] != null) {
+				if (!compiled_ids.hasOwnProperty(Animation_Static_animated_ids[a])) {
+					compiled_ids[Animation_Static_animated_ids[a]] = {};
+				}
+				compiled_ids[Animation_Static_animated_ids[a]][animation_id] = [keyfr[0], keyfr[1]];
+				compiled_ids_animation_count++;
+			}
+		}
+	}
+	if (Animation_Static_animation_compiled_id_ranges.length == 0) {
+		Animation_Static_animation_compiled_id_ranges.push(Animation_Static_animation_compiled_frames);
+		Animation_Static_animation_compiled_ids[Animation_Static_animation_compiled_frames] = compiled_ids;
+	} else {
+		var last_range = Animation_Static_animation_compiled_id_ranges[Animation_Static_animation_compiled_id_ranges.length - 1];
+		var last_compiled = Animation_Static_animation_compiled_ids[last_range];
+		var last_elem_count = 0;
+		var difference = false;
+		for (var animated_elem_id in last_compiled) {
+			if ( !(Object.prototype.hasOwnProperty.call(last_compiled, animated_elem_id) && Object.prototype.hasOwnProperty.call(compiled_ids, animated_elem_id)) ) {
+				last_elem_count++;
+				difference = true;
+				break;
+			} else {
+				last_elem_count++;
+				for (var animation_id in last_compiled[animated_elem_id]) {
+					if ( !(Object.prototype.hasOwnProperty.call(last_compiled[animated_elem_id], animation_id) && Object.prototype.hasOwnProperty.call(compiled_ids[animated_elem_id], animation_id)) ) {
+						difference = true;
+						break;
+					}
+				}
+				if (difference) break;
+			}
+		}
+		if ((last_elem_count == 0 && compiled_ids_animation_count != 0) || difference || last_elem_count != compiled_ids_animation_count) {
+			Animation_Static_animation_compiled_id_ranges.push(Animation_Static_animation_compiled_frames);
+	                Animation_Static_animation_compiled_ids[Animation_Static_animation_compiled_frames] = compiled_ids;
+		}
+	}
+	Animation_Static_animation_compiled_frames++;
+}
+//END - COMPILING
 
 var Animation_Static_set_type = function(menu_id) {
 	Animation_Static_animation_type = Animation_Static_animation_types[document.getElementById(menu_id + "_animation_select_type").selectedIndex];
@@ -27,6 +94,46 @@ var Animation_Static_start_toggle = function(menu_id) {
 	} else {
 		start_button.appendChild(document.createTextNode(String.fromCodePoint(0x23f4)));
 	}
+}
+
+var Animation_Static_get_animation_frame = function(animation, frame) {
+		var current_frame = frame - animation.frame_start;
+                if (animation.type == "single") {
+
+                } else if (animation.type == "repeat") {
+                        current_frame = current_frame % animation.length;
+                } else if (animation.type == "ping-pong") {
+                        var it = current_frame / animation.length;
+                        current_frame = current_frame % animation.length;
+                        if (it % 2 >= 1) {
+                                current_frame = animation.length - current_frame;
+                        }
+                }
+		return current_frame;
+}
+
+var Animation_Static_is_animation_active = function(animation, frame) {
+	if (animation.frame_start <= frame && animation.frame_end > frame) {
+        	var from_k = null;
+                var to_k = null;
+
+                var current_frame = Animation_Static_get_animation_frame(animation, frame);
+                for (var prop in animation.keyframes) {
+                	if (Object.prototype.hasOwnProperty.call(animation.keyframes, prop)) {
+				prop = parseInt(prop);
+                        	if (prop <= current_frame && (from_k == null || from_k < prop)) {
+                                	from_k = prop;
+                                }
+                                if (prop >= current_frame && (to_k == null || to_k > prop) && prop != from_k) {
+                                	to_k = prop;
+                                }
+                        }
+                }
+                if (from_k != null && to_k != null) {
+			return [ from_k, to_k, current_frame ];
+		}
+	}
+	return [ null, null, current_frame ];
 }
 
 var Animation_Static_next = function(single = false) {
@@ -47,34 +154,13 @@ var Animation_Static_next = function(single = false) {
 	for (var a = 0; a < Animation_Static_animated_ids.length; a++) {
 		var current = Animation_Static_animations[Animation_Static_animated_ids[a]];
 		for (var animation_id in current) {
+			if (!Object.prototype.hasOwnProperty.call(current, animation_id)) continue;
 			var animation = current[animation_id];
-			if (animation.frame_start <= Animation_Static_animation_frame_current && animation.frame_end > Animation_Static_animation_frame_current) {
-				var from_k = null;
-				var to_k = null;
-
-				var current_frame = Animation_Static_animation_frame_current - animation.frame_start;
-                                if (animation.type == "single") {
-
-				} else if (animation.type == "repeat") {
-					current_frame = current_frame % animation.length;
-				} else if (animation.type == "ping-pong") {
-					var it = current_frame / animation.length;
-					current_frame = current_frame % animation.length;
-					if (it % 2 >= 1) {
-						current_frame = animation.length - current_frame;
-					}
-				}
-				for (var prop in animation.keyframes) {
-                			if (Object.prototype.hasOwnProperty.call(animation.keyframes, prop)) {
-						if (prop <= current_frame && (from_k == null || from_k < prop)) {
-							from_k = prop;
-						}
-						if (prop > current_frame && (to_k == null || to_k > prop)) {
-							to_k = prop;
-						}
-					}
-				}
-				if (from_k != null && to_k != null) {
+			var keyfr = Animation_Static_is_animation_active(animation, Animation_Static_animation_frame_current);
+			var from_k = keyfr[0];
+			var to_k = keyfr[1];
+			var current_frame = keyfr[2];
+			if (from_k != null && to_k != null) {
 					var element = document.getElementById(Animation_Static_animated_ids[a]);
 					var content = document.getElementById(Animation_Static_animated_ids[a] + "_content");
 
@@ -93,7 +179,6 @@ var Animation_Static_next = function(single = false) {
 							}
 						}
 					}
-				}
 			}
 		}
 	}
@@ -190,14 +275,15 @@ var Animation = function() {
 					event.preventDefault();
 					Animation_Static_animation_frame_max = this.value;
 				});
-/*
+
 				var compile_button = document.createElement("button");
 				compile_button.id = this.id + "_animation_compile_button";
-				compile_button.setAttribute("onclick", "javascript:Animation_Static_compile_animations()");
-*/
+				compile_button.appendChild(document.createTextNode("compile"));
+				compile_button.setAttribute("onclick", "javascript:Animation_Static_start_compiling()");
+
 				controls_div.appendChild(select_animation_type);
 				controls_div.appendChild(max_frames_form);
-//				controls_div.appendChild(compile_button);
+				controls_div.appendChild(compile_button);
 
 				this.is_init = true;
 			}

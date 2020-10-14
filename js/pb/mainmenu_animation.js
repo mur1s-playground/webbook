@@ -24,12 +24,14 @@ var MainMenu_Animation_Static_update_animation_selection = function(menu_id) {
 
 	var animations = Animation_Static_animations[selected_id];
 
-	for (var a = 0; a < animations.length; a++) {
-		var option = document.createElement("option");
-		option.id = menu_id + "_animation_select_" + a;
-		option.value = a;
-		option.appendChild(document.createTextNode(a + ": " + animations[a].title));
-		animation_select.appendChild(option);
+	if (animations != undefined) {
+		for (var a = 0; a < animations.length; a++) {
+			var option = document.createElement("option");
+			option.id = menu_id + "_animation_select_" + a;
+			option.value = a;
+			option.appendChild(document.createTextNode(a + ": " + animations[a].title));
+			animation_select.appendChild(option);
+		}
 	}
 }
 
@@ -265,14 +267,28 @@ var MainMenu_Animation = function() {
 
 				var animation_start_frame = document.createElement("input");
 				animation_start_frame.id = this.id + "_animation_start_frame";
+				animation_start_frame.menu_id = this.id;
 				animation_start_frame.title = "animation start frame";
 				animation_start_frame.value = 0;
+				animation_start_frame.addEventListener("keydown", function(event) {
+					if (event.key == "Enter") {
+						event.preventDefault();
+						MainMenu_Animation_Static_set_start_frame(this.menu_id);
+					}
+				});
 				animation_editor_controls.appendChild(animation_start_frame);
 
 				var animation_stop_frame = document.createElement("input");
 				animation_stop_frame.id = this.id + "_animation_stop_frame";
+				animation_stop_frame.menu_id = this.id;
 				animation_stop_frame.title = "animation stop frame";
 				animation_stop_frame.value = 100;
+				animation_stop_frame.addEventListener("keydown", function(event) {
+                                        if (event.key == "Enter") {
+                                                event.preventDefault();
+                                                MainMenu_Animation_Static_set_stop_frame(this.menu_id);
+                                        }
+                                });
 				animation_editor_controls.appendChild(animation_stop_frame);
 
 				var animation_length_form = document.createElement("input");
@@ -361,6 +377,8 @@ var MainMenu_Animation = function() {
 
 		if (selected_id != null && selected_id != undefined) {
 			var selected_elem = document.getElementById(selected_id);
+			MainMenu_Animation_Static_update_animation_selection(this.id);
+			MainMenu_Animation_Static_set_controls_fields(this.id);
 		} else {
 			MainMenu_Static_toggle_controls(this.id, false);
 		}
