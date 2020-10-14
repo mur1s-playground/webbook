@@ -136,6 +136,41 @@ var Animation_Static_is_animation_active = function(animation, frame) {
 	return [ null, null, current_frame ];
 }
 
+var Animation_Static_calculate_animation = function(element_id, animation, from_k, to_k, current_frame) {
+	var element = document.getElementById(element_id);
+        var content = document.getElementById(element_id + "_content");
+
+        var elem_from_style = animation.keyframes[from_k]["element_style"];
+        var elem_to_style = animation.keyframes[to_k]["element_style"];
+        for (var prop in elem_from_style) {
+        	if (Object.prototype.hasOwnProperty.call(elem_from_style, prop) && Object.prototype.hasOwnProperty.call(elem_to_style, prop)) {
+                	var f = elem_from_style[prop].replace(/^([-]?[\d]+(?:\.[\d]+)?)(px)?$/g, "$1");
+                        var t = elem_to_style[prop].replace(/^([-]?[\d]+(?:\.[\d]+)?)(px)?$/g, "$1");
+
+                        if (isNaN(f) || isNaN(t)) {
+                        	var rgba_f = elem_from_style[prop].replace(/^(?:rgba\(([\d]+), ([\d]+), ([\d]+), ([\d](?:.[\d]+)?)\))$/g, "$1 $2 $3 $4").replace(/(?:rgb\(([\d]+), ([\d]+), ([\d]+)()\))$/g, "$1 $2 $3 $4").split(" ");
+                                var rgba_t = elem_to_style[prop].replace(/^(?:rgba\(([\d]+), ([\d]+), ([\d]+), ([\d](?:.[\d]+)?)\))$/g, "$1 $2 $3 $4").replace(/(?:rgb\(([\d]+), ([\d]+), ([\d]+)()\))$/g, "$1 $2 $3 $4").split(" ");
+                                if (rgba_f.length == 4 && rgba_t.length == 4) {
+                                	if (rgba_f[3] == "") rgba_f[3] = 1.0;
+                                        if (rgba_t[3] == "") rgba_t[3] = 1.0;
+                                        var result = "rgba(";
+                                        for (var c = 0; c < 4; c++) {
+                                        	f = parseInt(rgba_f[c]);
+                                                t = parseInt(rgba_t[c]);
+                                                result += (f + ((current_frame - from_k)/(to_k - from_k) * (t - f)));
+                                        	if (c < 3) result += ", ";
+                                        }
+                                        element.style[prop] = result + ")";
+                                }
+                         } else {
+                         	f = parseFloat(f);
+                                t = parseFloat(t);
+                                element.style[prop] = f + ((current_frame - from_k)/(to_k - from_k) * (t - f));
+                         }
+                }
+        }
+}
+
 var Animation_Static_next = function(single = false) {
 	if (!Animation_Static_started && !single) return;
 	if (Animation_Static_animation_type == "repeat") {
@@ -151,48 +186,41 @@ var Animation_Static_next = function(single = false) {
 		}
 		Animation_Static_animation_frame_current++;
 	}
-	for (var a = 0; a < Animation_Static_animated_ids.length; a++) {
-		var current = Animation_Static_animations[Animation_Static_animated_ids[a]];
-		for (var animation_id in current) {
-			if (!Object.prototype.hasOwnProperty.call(current, animation_id)) continue;
-			var animation = current[animation_id];
-			var keyfr = Animation_Static_is_animation_active(animation, Animation_Static_animation_frame_current);
-			var from_k = keyfr[0];
-			var to_k = keyfr[1];
-			var current_frame = keyfr[2];
-			if (from_k != null && to_k != null) {
-					var element = document.getElementById(Animation_Static_animated_ids[a]);
-					var content = document.getElementById(Animation_Static_animated_ids[a] + "_content");
-
-					var elem_from_style = animation.keyframes[from_k]["element_style"];
-					var elem_to_style = animation.keyframes[to_k]["element_style"];
-					for (var prop in elem_from_style) {
-						if (Object.prototype.hasOwnProperty.call(elem_from_style, prop) && Object.prototype.hasOwnProperty.call(elem_to_style, prop)) {
-							var f = elem_from_style[prop].replace(/^([-]?[\d]+(?:\.[\d]+)?)(px)?$/g, "$1");
-							var t = elem_to_style[prop].replace(/^([-]?[\d]+(?:\.[\d]+)?)(px)?$/g, "$1");
-
-							if (isNaN(f) || isNaN(t)) {
-								var rgba_f = elem_from_style[prop].replace(/^(?:rgba\(([\d]+), ([\d]+), ([\d]+), ([\d](?:.[\d]+)?)\))$/g, "$1 $2 $3 $4").replace(/(?:rgb\(([\d]+), ([\d]+), ([\d]+)()\))$/g, "$1 $2 $3 $4").split(" ");
-								var rgba_t = elem_to_style[prop].replace(/^(?:rgba\(([\d]+), ([\d]+), ([\d]+), ([\d](?:.[\d]+)?)\))$/g, "$1 $2 $3 $4").replace(/(?:rgb\(([\d]+), ([\d]+), ([\d]+)()\))$/g, "$1 $2 $3 $4").split(" ");
-								if (rgba_f.length == 4 && rgba_t.length == 4) {
-									if (rgba_f[3] == "") rgba_f[3] = 1.0;
-									if (rgba_t[3] == "") rgba_t[3] = 1.0;
-									var result = "rgba(";
-									for (var c = 0; c < 4; c++) {
-										f = parseInt(rgba_f[c]);
-										t = parseInt(rgba_t[c]);
-										result += (f + ((current_frame - from_k)/(to_k - from_k) * (t - f)));
-										if (c < 3) result += ", ";
-									}
-									element.style[prop] = result + ")";
-								}
-							} else {
-								f = parseFloat(f);
-								t = parseFloat(t);
-								element.style[prop] = f + ((current_frame - from_k)/(to_k - from_k) * (t - f));
-							}
-						}
-					}
+	if (Animation_Static_animation_is_compiled) {
+		var range_start_idx = -1;
+		for (var r_id = 0; r_id < Animation_Static_animation_compiled_id_ranges.length; r_id++) {
+			if (Animation_Static_animation_compiled_id_ranges[r_id] <= Animation_Static_animation_frame_current) {
+				range_start_idx = Animation_Static_animation_compiled_id_ranges[r_id];
+			} else {
+				break;
+			}
+		}
+		var compiled_ids = Animation_Static_animation_compiled_ids[range_start_idx];
+		for (var element_id in compiled_ids) {
+			if (!Object.prototype.hasOwnProperty.call(compiled_ids, element_id)) continue;
+			for (var animation_id in compiled_ids[element_id]) {
+				if (!Object.prototype.hasOwnProperty.call(compiled_ids[element_id], animation_id)) continue;
+				var animation = Animation_Static_animations[element_id][animation_id];
+				var keyfr = compiled_ids[element_id][animation_id];
+				var from_k = keyfr[0];
+				var to_k = keyfr[1];
+				var current_frame = Animation_Static_get_animation_frame(animation, Animation_Static_animation_frame_current);
+				Animation_Static_calculate_animation(element_id, animation, from_k, to_k, current_frame);
+			}
+		}
+	} else {
+		for (var a = 0; a < Animation_Static_animated_ids.length; a++) {
+			var current = Animation_Static_animations[Animation_Static_animated_ids[a]];
+			for (var animation_id in current) {
+				if (!Object.prototype.hasOwnProperty.call(current, animation_id)) continue;
+				var animation = current[animation_id];
+				var keyfr = Animation_Static_is_animation_active(animation, Animation_Static_animation_frame_current);
+				var from_k = keyfr[0];
+				var to_k = keyfr[1];
+				var current_frame = keyfr[2];
+				if (from_k != null && to_k != null) {
+					Animation_Static_calculate_animation(Animation_Static_animated_ids[a], animation, from_k, to_k, current_frame);
+				}
 			}
 		}
 	}

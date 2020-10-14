@@ -1,16 +1,73 @@
-<div id="main_app">
-</div>
-<script type="text/javascript">
-    var main_menu;
-    var main_app;
-    function init() {
-	document.getElementById("main_app").innerHTML = main_app.innerHTML;
-	var main_menu_elem = document.getElementById(main_menu.id);
-	for (var mi = 0; mi < main_menu.item_ids.length; mi++) {
-		document.getElementById(main_menu.item_ids[mi]).remove();
-	}
-	main_menu_elem.remove();
-    }
+<html>
+	<head>
+		<script type="text/javascript" src="https://mur1.de/sites/mur1/js/pb/animation.js"></script>
+	</head>
+<body>
+	<div id="main_app">
+	</div>
 
-    init();
+	<script type="text/javascript">
+		var main_menu;
+		var main_app;
+
+		//Animations ----------------------------.-//
+		var main_animation;
+		var a_Static_started;
+                var a_Static_animation_type;
+                var a_Static_animated_ids;
+                var a_Static_animations;
+                var a_Static_animation_frame_max;
+
+		var a_Static_animation_is_compiled;
+                var a_Static_animation_compiled_id_ranges;
+                var a_Static_animation_compiled_ids;
+		//-----------------------------------------//
+
+		var is_init = false;
+
+		function init() {
+			document.getElementById("main_app").innerHTML = main_app.innerHTML;
+			var main_menu_elem = document.getElementById(main_menu.id);
+			for (var mi = 0; mi < main_menu.item_ids.length; mi++) {
+				document.getElementById(main_menu.item_ids[mi]).remove();
+			}
+			main_menu_elem.remove();
+
+			//Animations -----------------------------------------------------------------------------------------------------//
+			if (a_Static_animated_ids.length == 0) {
+				document.getElementById(main_animation.id).remove();
+				return;
+			}
+			Animation_Static_started = true;
+			Animation_Static_animation_type = a_Static_animation_type;
+
+			Animation_Static_animated_ids = a_Static_animated_ids;
+			Animation_Static_animations = a_Static_animations;
+
+			Animation_Static_animation_frame_max = a_Static_animation_frame_max;
+
+			Animation_Static_animation_is_compiled = a_Static_animation_is_compiled;
+			Animation_Static_animation_compiled_id_ranges = a_Static_animation_compiled_id_ranges;
+			Animation_Static_animation_compiled_ids = a_Static_animation_compiled_ids;
+
+			document.getElementById(main_animation.id + "_animation_settings_button").remove();
+			document.getElementById(main_animation.id + "_animation_start_button").innerHTML = String.fromCodePoint(0x23f8);
+			//----------------------------------------------------------------------------------------------------------------//
+		 }
+
+		function mainLoop() {
+			if (!is_init) {
+				init();
+				is_init = true;
+			}
+
+			//Animations -------------------------------//
+			if (a_Static_animated_ids.length > 0) {
+	                	Animation_Static_next();
+        	        	requestAnimationFrame(mainLoop);
+			}
+			//------------------------------------------//
+        	}
+	        requestAnimationFrame(mainLoop);
 </script>
+</body>

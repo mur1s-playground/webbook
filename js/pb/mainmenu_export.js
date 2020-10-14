@@ -7,6 +7,18 @@ var MainMenu_Export_Static_export = function(type) {
 		open_window.main_menu = main_menu;
 	        open_window.main_app = elem;
 
+		//Animation
+		open_window.main_animation = main_animation;
+		open_window.a_Static_started = true;
+		open_window.a_Static_animation_type = Animation_Static_animation_type;
+		open_window.a_Static_animated_ids = Animation_Static_animated_ids;
+		open_window.a_Static_animations = Animation_Static_animations;
+		open_window.a_Static_animation_frame_max = Animation_Static_animation_frame_max;
+
+		open_window.a_Static_animation_is_compiled = Animation_Static_animation_is_compiled;
+		open_window.a_Static_animation_compiled_id_ranges = Animation_Static_animation_compiled_id_ranges;
+		open_window.a_Static_animation_compiled_ids = Animation_Static_animation_compiled_ids;
+
 		MainMenu_Static_toggle_controls(selected_controls_id);
 	}
 }
