@@ -168,10 +168,24 @@ var Animation_Static_next = function(single = false) {
 					var elem_to_style = animation.keyframes[to_k]["element_style"];
 					for (var prop in elem_from_style) {
 						if (Object.prototype.hasOwnProperty.call(elem_from_style, prop) && Object.prototype.hasOwnProperty.call(elem_to_style, prop)) {
-							var f = elem_from_style[prop].replace(/^([\d]+(?:\.[\d]+)?)(px)?$/g, "$1");
-							var t = elem_to_style[prop].replace(/^([\d]+(?:\.[\d]+)?)(px)?$/g, "$1");
-							if (isNaN(f) || isNaN(t)) {
+							var f = elem_from_style[prop].replace(/^([-]?[\d]+(?:\.[\d]+)?)(px)?$/g, "$1");
+							var t = elem_to_style[prop].replace(/^([-]?[\d]+(?:\.[\d]+)?)(px)?$/g, "$1");
 
+							if (isNaN(f) || isNaN(t)) {
+								var rgba_f = elem_from_style[prop].replace(/^(?:rgba\(([\d]+), ([\d]+), ([\d]+), ([\d](?:.[\d]+)?)\))$/g, "$1 $2 $3 $4").replace(/(?:rgb\(([\d]+), ([\d]+), ([\d]+)()\))$/g, "$1 $2 $3 $4").split(" ");
+								var rgba_t = elem_to_style[prop].replace(/^(?:rgba\(([\d]+), ([\d]+), ([\d]+), ([\d](?:.[\d]+)?)\))$/g, "$1 $2 $3 $4").replace(/(?:rgb\(([\d]+), ([\d]+), ([\d]+)()\))$/g, "$1 $2 $3 $4").split(" ");
+								if (rgba_f.length == 4 && rgba_t.length == 4) {
+									if (rgba_f[3] == "") rgba_f[3] = 1.0;
+									if (rgba_t[3] == "") rgba_t[3] = 1.0;
+									var result = "rgba(";
+									for (var c = 0; c < 4; c++) {
+										f = parseInt(rgba_f[c]);
+										t = parseInt(rgba_t[c]);
+										result += (f + ((current_frame - from_k)/(to_k - from_k) * (t - f)));
+										if (c < 3) result += ", ";
+									}
+									element.style[prop] = result + ")";
+								}
 							} else {
 								f = parseFloat(f);
 								t = parseFloat(t);

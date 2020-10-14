@@ -41,8 +41,9 @@ var TextField = function(url) {
 			element.width = this.dim[0];
 			element.height = this.dim[1];
 			element.style.overflow = "hidden";
-			element.style.backgroundColor = this.bg;
+//			element.style.backgroundColor = this.bg;
 			if (!this.is_init) {
+				element.style.backgroundColor = "rgba(255, 255, 255, 1.0)";
 				element.style.zIndex = 1;
 				element.setAttribute('onclick' , "javascript:set_selected_id(this.id)");
 				element.style.width = 100;
@@ -51,13 +52,17 @@ var TextField = function(url) {
                                 element.style.borderTopRightRadius = "0px";
                                 element.style.borderBottomLeftRadius = "0px";
                                 element.style.borderBottomRightRadius = "0px";
+				element.style.borderLeft = "0px";
+				element.style.borderRight = "0px";
+				element.style.borderTop = "0px";
+				element.style.borderBottom = "0px";
 
 				this.dim_set(100, 100);
 
 				var ps = document.createElement("span");
 				ps.id = this.id + "_content";
 				ps.parent_id = this.id;
-				ps.style.color = "#000000";
+				ps.style.color = "rgba(0, 0, 0, 1.0)";
 				ps.style.position = "relative";
 				ps.style.top = 0;
 				ps.style.left = 0;

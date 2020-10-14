@@ -146,6 +146,18 @@ var MainMenu_Animation_Static_set_length = function(menu_id) {
 	MainMenu_Animation_Static_update_keyframes(menu_id);
 }
 
+var MainMenu_Animation_Static_style_pack = function(style) {
+	var result = {};
+	for (var prop in style) {
+		if (Object.prototype.hasOwnProperty.call(style, prop)) {
+			if (isNaN(prop) && style[prop] != null && style[prop] != "" && style[prop] != undefined) {
+				result[prop] = style[prop];
+			}
+		}
+	}
+	return result;
+}
+
 var MainMenu_Animation_Static_add_keyframe = function(menu_id) {
 	var animation = Animation_Static_animations[selected_id][document.getElementById(menu_id + "_animation_select").selectedIndex];
 	MainMenu_Animation_Static_delete_keyframe(menu_id);
@@ -154,8 +166,8 @@ var MainMenu_Animation_Static_add_keyframe = function(menu_id) {
 	var content_elem = document.getElementById(selected_id + "_content");
 
 	animation.keyframes[animation.current_frame] = {
-			element_style:	Object.assign({}, selected_elem.style),
-			content_style:	Object.assign({}, content_elem.style),
+			element_style:	MainMenu_Animation_Static_style_pack(Object.assign({}, selected_elem.style)),
+			content_style:	MainMenu_Animation_Static_style_pack(Object.assign({}, content_elem.style)),
 			content:	content_elem.innerHTML
 	};
 
